@@ -1,5 +1,5 @@
 $ ./test.sh
-# 以下省略...
+以下省略...
 
 $ ./c4 -s test/power2.c
 1: #include <stdio.h>
