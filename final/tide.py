@@ -2,14 +2,14 @@ import requests
 from bs4 import BeautifulSoup
 
 URL = "https://www.cwa.gov.tw/V8/C/M/Fishery/tide_30day_MOD/T902001.html"
-TARGET_NAME = "金城"  # 抓金門縣金城的潮汐資料
+TARGET_NAME = "金城" 
 
 def fetch_kinmen_tide():
     resp = requests.get(URL, timeout=10)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    rows = soup.select("table tr")[1:]  # 跳過標題
+    rows = soup.select("table tr")[1:]  
     result = []
 
     for tr in rows:
@@ -17,8 +17,7 @@ def fetch_kinmen_tide():
         if not cols:
             continue
         if TARGET_NAME in cols[0]:
-            # 實際資料中，欄位可能是10個或11個，乾潮/滿潮時間和值可能有缺漏
-            # 先取欄位，沒有就用空字串代替
+            
             def get_col(i):
                 return cols[i] if i < len(cols) else ""
 
@@ -62,7 +61,7 @@ if __name__ == "__main__":
         tides = fetch_kinmen_tide()
         if tides:
             print(f"潮汐資訊：金門縣金城\n")
-            print_tide(tides[:10])  # 顯示前 10 天
+            print_tide(tides[:10])  
         else:
             print("找不到金城站點的資料")
     except Exception as e:
