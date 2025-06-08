@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
 
 URL = "https://www.cwa.gov.tw/V8/C/M/Fishery/tide_30day_MOD/T902001.html"
 TARGET_NAME = "金城"  # 抓金門縣金城的潮汐資料
@@ -10,27 +9,42 @@ def fetch_kinmen_tide():
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # 找到日期區塊與潮汐時間
     rows = soup.select("table tr")[1:]  # 跳過標題
     result = []
+
     for tr in rows:
         cols = [c.get_text(strip=True) for c in tr.find_all("td")]
-        if len(cols) >= 6 and TARGET_NAME in cols[0]:
-            # 解析：cols 含 日期、農曆、潮差說明、乾潮1 & 時間、滿潮1 & 時間、乾潮2 & 時間、滿潮2 & 時間
-            date, lunar, _, low1, low1_t, high1, high1_t, low2, low2_t, high2, high2_t = (
-                cols[0], cols[1], cols[2], cols[3], cols[4], cols[5], cols[6], cols[7], cols[8], cols[9], cols[10]
-            )
+        if not cols:
+            continue
+        if TARGET_NAME in cols[0]:
+            # 實際資料中，欄位可能是10個或11個，乾潮/滿潮時間和值可能有缺漏
+            # 先取欄位，沒有就用空字串代替
+            def get_col(i):
+                return cols[i] if i < len(cols) else ""
+
+            date = get_col(0)
+            lunar = get_col(1)
+
+            low1_val = get_col(3)
+            low1_time = get_col(4)
+            high1_val = get_col(5)
+            high1_time = get_col(6)
+            low2_val = get_col(7)
+            low2_time = get_col(8)
+            high2_val = get_col(9)
+            high2_time = get_col(10)
+
             result.append({
                 "date": date,
                 "lunar": lunar,
-                "low1_time": low1_t,
-                "low1_val": low1,
-                "high1_time": high1_t,
-                "high1_val": high1,
-                "low2_time": low2_t,
-                "low2_val": low2,
-                "high2_time": high2_t,
-                "high2_val": high2
+                "low1_time": low1_time,
+                "low1_val": low1_val,
+                "high1_time": high1_time,
+                "high1_val": high1_val,
+                "low2_time": low2_time,
+                "low2_val": low2_val,
+                "high2_time": high2_time,
+                "high2_val": high2_val
             })
     return result
 
@@ -47,11 +61,9 @@ if __name__ == "__main__":
     try:
         tides = fetch_kinmen_tide()
         if tides:
-            print(f" 潮汐資訊：金門縣金城（共{len(tides)}天資料）\n")
-            print_tide(tides[:5])  # 只顯示前 5 天
+            print(f"潮汐資訊：金門縣金城\n")
+            print_tide(tides[:10])  # 顯示前 10 天
         else:
             print("找不到金城站點的資料")
     except Exception as e:
         print(" 錯誤：", e)
-
-
