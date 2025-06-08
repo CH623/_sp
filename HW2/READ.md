@@ -1,4 +1,6 @@
-smFib
+# asmFib
+
+```
 $ ./test.sh
 ++ gcc -w c4.c -o c4
 ++ ./c4
@@ -924,3 +926,4 @@ f(7)=13
 919> PSH
 920> EXIT
 exit(8) cycle = 920
+```
